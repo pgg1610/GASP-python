@@ -51,7 +51,7 @@ def main():
 
     geometry = objects_dict['geometry']
     # create E_sub_prim and n_sub_prim
-    E_sub_prim, n_sub_prim = None, None
+    E_sub_prim, n_sub_prim, epa_bulk_film = None, None, None
     lat_match_dict = None
     substrate_search = False
     if geometry.shape == 'interface':
@@ -59,7 +59,8 @@ def main():
 
     if substrate_search:
         match_constraints = objects_maker.get_lat_match_params(parameters)
-        E_sub_prim, n_sub_prim = objects_maker.get_prim_sub_data(parameters)
+        E_sub_prim, n_sub_prim, epa_bulk_film = \
+                                    objects_maker.get_prim_sub_data(parameters)
         if E_sub_prim is None or n_sub_prim is None:
             print ('The energy and no. of atoms of substrate calculation not '
                     'provided.' + '\nQuitting...')
@@ -67,6 +68,7 @@ def main():
         lat_match_dict = match_constraints
         lat_match_dict['E_sub_prim'] = E_sub_prim
         lat_match_dict['n_sub_prim'] = n_sub_prim
+        lat_match_dict['epa_bulk_film'] = epa_bulk_film
         # Parse the primitve substrate structure from input argument
         sub_cell = general.Cell.from_file(os.path.abspath(sys.argv[2]))
         # make it conventional_standard_structure using pymatgen to avoid issues
@@ -152,7 +154,8 @@ def main():
                             whole_pop.append(copy.deepcopy(new_organism))
                             # pad with vacuum
                             geometry.pad(new_organism.cell)
-                            kwargs = {'E_sub_prim': None, 'n_sub_prim': None}
+                            kwargs = {'E_sub_prim': None, 'n_sub_prim': None,
+                                       'epa_bulk_film': None}
                             if substrate_search:
                                 # lattice match substrate
                                 new_organism.cell, new_organism.n_sub, \
@@ -162,6 +165,7 @@ def main():
                                             match_constraints)
                                 kwargs['E_sub_prim'] = E_sub_prim
                                 kwargs['n_sub_prim'] = n_sub_prim
+                                kwargs['epa_bulk_film'] = epa_bulk_film
                                 if new_organism.cell is None: #if LMA fail
                                     # remove the organism from whole_pop
                                     del whole_pop[-1]
@@ -267,8 +271,9 @@ def main():
                                                     copy.deepcopy(new_organism))
                                         # pad with vacuum
                                         geometry.pad(new_organism.cell)
-                                        kwargs = {'E_sub_prim': None, \
-                                                            'n_sub_prim': None}
+                                        kwargs = {'E_sub_prim': None,
+                                                  'n_sub_prim': None,
+                                                  'epa_bulk_film': None}
                                         if substrate_search:
                                             # lattice match substrate
                                             new_organism.cell, \
@@ -280,6 +285,7 @@ def main():
                                                         match_constraints)
                                             kwargs['E_sub_prim'] = E_sub_prim
                                             kwargs['n_sub_prim'] = n_sub_prim
+                                            kwargs['epa_bulk_film'] = epa_bulk_film
                                             if new_organism.cell is None: #if LMA fail
                                                 # remove the organism from whole_pop
                                                 del whole_pop[-1]
@@ -379,7 +385,7 @@ def main():
             developer, redundancy_guard, composition_space, constraints)
         whole_pop.append(copy.deepcopy(unrelaxed_offspring))
         geometry.pad(unrelaxed_offspring.cell)
-        kwargs = {'E_sub_prim': None, 'n_sub_prim': None}
+        kwargs = {'E_sub_prim': None, 'n_sub_prim': None, 'epa_bulk_film': None}
         if substrate_search:
             geometry.pad(unrelaxed_offspring.cell)
             unrelaxed_offspring.cell, unrelaxed_offspring.n_sub, \
@@ -387,6 +393,7 @@ def main():
                     substrate_prim, unrelaxed_offspring.cell, match_constraints)
             kwargs['E_sub_prim'] = E_sub_prim
             kwargs['n_sub_prim'] = n_sub_prim
+            kwargs['epa_bulk_film'] = epa_bulk_film
             if unrelaxed_offspring.cell is None:
                 del whole_pop[-1]
                 continue
@@ -490,7 +497,8 @@ def main():
                             composition_space, constraints)
                     whole_pop.append(copy.deepcopy(unrelaxed_offspring))
                     geometry.pad(unrelaxed_offspring.cell)
-                    kwargs = {'E_sub_prim': None, 'n_sub_prim': None}
+                    kwargs = {'E_sub_prim': None, 'n_sub_prim': None,
+                                'epa_bulk_film': None}
 
                     if substrate_search:
                         unrelaxed_offspring.cell, unrelaxed_offspring.n_sub, \
@@ -498,6 +506,7 @@ def main():
                                 substrate_prim, unrelaxed_offspring.cell, match_constraints)
                         kwargs['E_sub_prim'] = E_sub_prim
                         kwargs['n_sub_prim'] = n_sub_prim
+                        kwargs['epa_bulk_film'] = epa_bulk_film
                         if unrelaxed_offspring.cell is None:
                             del whole_pop[-1]
                             continue

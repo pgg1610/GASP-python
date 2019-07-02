@@ -286,7 +286,7 @@ def get_lat_match_params(parameters):
     for key, param in zip(keys, match_constraints):
         lat_match_params[key] = param
 
-    # Check if any user specied constraints are available and replace    
+    # Check if any user specied constraints are available and replace
     if 'LatticeMatch' not in parameters:
         print ('No lattice match constraints provided. Using defaults...')
     else:
@@ -306,9 +306,10 @@ def get_prim_sub_data(parameters):
     if 'Substrate_prim_calc' in parameters:
         E_sub_prim = parameters['Substrate_prim_calc']['E_sub_prim']
         n_sub_prim = parameters['Substrate_prim_calc']['n_sub_prim']
-        return E_sub_prim, n_sub_prim
+        epa_bulk_film = parameters['Substrate_prim_calc']['epa_bulk_film']
+        return E_sub_prim, n_sub_prim, epa_bulk_film
     else:
-        return None, None
+        return None, None, None
 
 def make_organism_creators(parameters, composition_space, constraints):
     """

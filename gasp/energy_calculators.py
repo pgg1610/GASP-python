@@ -64,7 +64,8 @@ class VaspEnergyCalculator(object):
         self.potcar_files = potcar_files
 
     def do_energy_calculation(self, organism, dictionary, key, composition_space,
-                       n_max_poscar=50, E_sub_prim=None, n_sub_prim=None):
+                              n_max_poscar=50, E_sub_prim=None, n_sub_prim=None,
+                              epa_bulk_film=None):
         """
         Calculates the energy of an organism using VASP, and stores the relaxed
         organism in the provided dictionary at the provided key. If the
@@ -114,7 +115,7 @@ class VaspEnergyCalculator(object):
                 return
 
         # potcar now may contain same species more than once in the order
-        # if it exists in poscar        
+        # if it exists in poscar
         # get a list of the element symbols in the sorted order
         symbols = []
         for site in organism.cell.sites:
@@ -189,7 +190,14 @@ class VaspEnergyCalculator(object):
             n_sub = organism.n_sub
             n_twod = n_iface - n_sub
             factor = n_sub/n_sub_prim
-            ef_ads = enthalpy/n_twod - factor * E_sub_prim / n_twod
+
+            # area based interface energy (Obj_fn_01)
+            # epa of stable bulk phase of 2D film
+            ab = relaxed_cell.lattice.matrix[:2]
+            cell_area = np.linalg.norm(np.cross(ab[0], ab[1]))
+            ef_ads = (enthalpy - factor * E_sub_prim - n_twod *
+                                                epa_bulk_film)/cell_area
+
             organism.epa = ef_ads
             print ('Setting Ef_adsorption of organism {} to {} eV/atom '.format(
                     organism.id, organism.epa))
@@ -239,7 +247,8 @@ class LammpsEnergyCalculator(object):
         self.input_script = input_script
 
     def do_energy_calculation(self, organism, dictionary, key,
-                        composition_space, E_sub_prim=None, n_sub_prim=None):
+                              composition_space, E_sub_prim=None, n_sub_prim=None,
+                              epa_bulk_film=None):
         """
         Calculates the energy of an organism using LAMMPS, and stores the
         relaxed organism in the provided dictionary at the provided key. If the
@@ -348,7 +357,14 @@ class LammpsEnergyCalculator(object):
             n_sub = organism.n_sub
             n_twod = n_iface - n_sub
             factor = n_sub/n_sub_prim
-            ef_ads = enthalpy / n_twod - factor * E_sub_prim / n_twod
+
+            # area based interface energy (Obj_fn_01)
+            # epa of stable bulk phase of 2D film
+            ab = relaxed_cell.lattice.matrix[:2]
+            cell_area = np.linalg.norm(np.cross(ab[0], ab[1]))
+            ef_ads = (enthalpy - factor * E_sub_prim - n_twod *
+                                                epa_bulk_film)/cell_area
+                                                
             organism.epa = ef_ads
             print ('Setting Ef_adsorption of organism {} to {} eV/atom '.format(
                     organism.id, organism.epa))
@@ -670,7 +686,8 @@ class GulpEnergyCalculator(object):
         return anions_shell, cations_shell
 
     def do_energy_calculation(self, organism, dictionary, key,
-                        composition_space, E_sub_prim=None, n_sub_prim=None):
+                              composition_space, E_sub_prim=None, n_sub_prim=None,
+                              epa_bulk_film=None):
         """
         Calculates the energy of an organism using GULP, and stores the relaxed
         organism in the provided dictionary at the provided key. If the
